@@ -1,12 +1,36 @@
+
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:objectbox/internal.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
-class BoxCard extends StatelessWidget {
+class BoxCard extends StatefulWidget {
   final String nome;
+
+  BoxCard(
+    this.nome,
+  );
+
+  @override
+  State<BoxCard> createState() => _BoxCardState();
+}
+
+class _BoxCardState extends State<BoxCard> {
   bool isLearned = false;
 
-  BoxCard(this.nome,);
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    SharedPreferences.getInstance().then((value) => {
+          if (value.containsKey(widget.nome))
+            {
+              setState(() {
+                isLearned = value.getBool(widget.nome)!;
+              })
+            }
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +54,7 @@ class BoxCard extends StatelessWidget {
                     Container(
                       width: 210,
                       child: Text(
-                        nome,
+                        widget.nome,
                         style: const TextStyle(
                           fontSize: 18,
                         ),
@@ -41,7 +65,13 @@ class BoxCard extends StatelessWidget {
                       return Switch(
                         value: isLearned,
                         activeColor: Colors.green,
-                        onChanged: (value) => setState(() => isLearned = value),
+                        onChanged: (value) async {
+                          final prefs = await SharedPreferences.getInstance();
+                          setState(() {
+                            prefs.setBool(widget.nome, value);
+                            isLearned = value;
+                          });
+                        },
                       );
                     }),
                   ],
