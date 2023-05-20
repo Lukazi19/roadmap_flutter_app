@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,19 +16,24 @@ class BoxCard extends StatefulWidget {
 
 class _BoxCardState extends State<BoxCard> {
   bool isLearned = false;
+  // ignore: prefer_typing_uninitialized_variables
+  late final prefs;
 
   @override
   void initState() {
-    // TODO: implement initState
+    initBox();
     super.initState();
-    SharedPreferences.getInstance().then((value) => {
-          if (value.containsKey(widget.nome))
-            {
-              setState(() {
-                isLearned = value.getBool(widget.nome)!;
-              })
-            }
-        });
+  }
+
+  Future<void> initBox()async {
+    prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(widget.nome))
+    {
+      setState(() {
+        isLearned = prefs.getBool(widget.nome)!;
+      });
+    }
+
   }
 
   @override
@@ -64,10 +70,11 @@ class _BoxCardState extends State<BoxCard> {
                         value: isLearned,
                         activeColor: Colors.green,
                         onChanged: (value) async {
-                          final prefs = await SharedPreferences.getInstance();
+
                           setState(() {
                             prefs.setBool(widget.nome, value);
                             isLearned = value;
+
                           });
                         },
                       );
